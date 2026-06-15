@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SNOBBLE TRAINING — 사전 설문조사</title>
+ <meta property="og:title" content="SNOBBLE TRAINING — 사전 설문조사">
+<meta property="og:description" content="지속될 수 있는 환경을 같이 만드는 곳, SNOBBLE TRAINING. 상담 전 사전 설문을 작성해 주세요.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#111830">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -322,7 +326,7 @@ function renderStep() {
   }
   var descText = q.desc ? q.desc : '';
   card.innerHTML = '<div class="q-label">' + q.label + '</div><div class="q-title">' + q.title + '</div>' + (descText ? '<div class="q-desc">' + descText + '</div>' : '') + '<div class="q-body">' + bodyHTML + '</div>';
-  document.getElementById('btn-prev').style.visibility = currentStep === 0 ? 'hidden' : 'visible';
+  document.getElementById('btn-prev').style.display = currentStep === 0 ? 'none' : 'block';
   document.getElementById('btn-next').textContent = currentStep === visible.length - 1 ? '제출하기' : '다음 ›';
   document.getElementById('error-msg').style.display = 'none';
 }
