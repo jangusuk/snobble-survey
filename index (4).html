@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SNOBBLE TRAINING — 사전 설문조사</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #1B2654;
+    --navy-dark: #111830;
+    --navy-light: #2A3A7C;
+    --blue-accent: #4F7FD4;
+    --blue-bright: #6B9FE8;
+    --white: #FFFFFF;
+    --white-80: rgba(255,255,255,0.8);
+    --white-50: rgba(255,255,255,0.5);
+    --white-20: rgba(255,255,255,0.2);
+    --white-10: rgba(255,255,255,0.1);
+    --white-06: rgba(255,255,255,0.06);
+    --error: #E87070;
+  }
+  body {
+    background-color: var(--navy-dark);
+    color: var(--white);
+    font-family: 'Apple SD Gothic Neo','Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+  .container { width: 100%; max-width: 480px; }
+
+  /* ── 홈 화면 ── */
+  #screen-home { text-align: center; padding: 3rem 2rem; }
+  .logo-wrap { margin-bottom: 2rem; }
+  .logo-wrap img { width: 220px; height: auto; }
+  .snowball-story {
+    margin: 2rem 0;
+    padding: 2rem 1.5rem;
+    border: 1px solid var(--white-20);
+    border-radius: 16px;
+    background: var(--white-06);
+    text-align: left;
+  }
+  .snowball-story p { font-size: 15px; line-height: 1.9; color: var(--white-80); }
+  .snowball-story .highlight {
+    color: var(--white);
+    font-weight: 700;
+    font-size: 16px;
+    display: block;
+    margin-top: 1rem;
+  }
+  .survey-meta {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin: 1.75rem 0;
+    font-size: 13px;
+    color: var(--white-50);
+  }
+  .survey-meta span { display: flex; align-items: center; gap: 6px; }
+  .meta-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue-accent); display: inline-block; }
+  .btn-start {
+    width: 100%; padding: 1rem;
+    background: var(--blue-accent);
+    color: var(--white);
+    border: none; border-radius: 12px;
+    font-size: 16px; font-weight: 700;
+    letter-spacing: 0.04em;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .btn-start:hover { background: var(--blue-bright); }
+  .privacy-note { font-size: 12px; color: var(--white-50); margin-top: 1rem; line-height: 1.6; }
+
+  /* ── 설문 화면 ── */
+  #screen-survey { display: none; }
+  .progress-bar-wrap { margin-bottom: 1.5rem; }
+  .progress-top { display: flex; justify-content: space-between; font-size: 12px; color: var(--white-50); margin-bottom: 8px; }
+  .progress-track { height: 3px; background: var(--white-10); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--blue-accent); border-radius: 2px; transition: width 0.4s ease; }
+  .question-card {
+    background: var(--white-06);
+    border: 1px solid var(--white-10);
+    border-radius: 20px;
+    padding: 2rem 1.5rem;
+    min-height: 340px;
+    display: flex; flex-direction: column;
+  }
+  .q-label { font-size: 11px; letter-spacing: 0.15em; color: var(--blue-accent); text-transform: uppercase; margin-bottom: 0.6rem; }
+  .q-title { font-size: 18px; font-weight: 600; line-height: 1.5; color: var(--white); margin-bottom: 0.4rem; }
+  .q-desc { font-size: 13px; color: var(--white-50); line-height: 1.7; margin-bottom: 1.25rem; white-space: pre-line; }
+  .q-body { flex: 1; }
+  .q-input, .q-textarea {
+    width: 100%;
+    background: var(--white-10);
+    border: 1px solid var(--white-20);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    color: var(--white);
+    font-size: 15px; font-family: inherit;
+    outline: none; transition: border 0.2s;
+  }
+  .q-input:focus, .q-textarea:focus { border-color: var(--blue-accent); }
+  .q-input::placeholder, .q-textarea::placeholder { color: var(--white-50); }
+  .q-textarea { resize: none; height: 130px; line-height: 1.6; }
+  .options-list { display: flex; flex-direction: column; gap: 8px; }
+  .option-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 0.75rem 1rem;
+    background: var(--white-06);
+    border: 1px solid var(--white-10);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border 0.15s, background 0.15s;
+    user-select: none;
+  }
+  .option-item:hover { background: var(--white-10); }
+  .option-item.selected { border-color: var(--blue-accent); background: rgba(79,127,212,0.12); }
+  .option-circle {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 1.5px solid var(--white-20); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: border 0.15s;
+  }
+  .option-square {
+    width: 20px; height: 20px; border-radius: 5px;
+    border: 1.5px solid var(--white-20); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: border 0.15s;
+  }
+  .option-item.selected .option-circle,
+  .option-item.selected .option-square { border-color: var(--blue-accent); background: var(--blue-accent); }
+  .option-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--white); display: none; }
+  .option-check { font-size: 12px; color: var(--white); display: none; }
+  .option-item.selected .option-dot,
+  .option-item.selected .option-check { display: block; }
+  .option-text { font-size: 14px; color: var(--white-80); }
+  .etc-input {
+    margin-top: 8px; width: 100%;
+    background: var(--white-10);
+    border: 1px solid var(--white-20);
+    border-radius: 10px;
+    padding: 0.6rem 0.9rem;
+    color: var(--white);
+    font-size: 14px; font-family: inherit;
+    outline: none; display: none;
+  }
+  .etc-input:focus { border-color: var(--blue-accent); }
+  .etc-input::placeholder { color: var(--white-50); }
+  .consent-box {
+    background: var(--white-06); border: 1px solid var(--white-10);
+    border-radius: 10px; padding: 1rem;
+    font-size: 12px; color: var(--white-50);
+    line-height: 1.8; margin-bottom: 1rem;
+  }
+  .consent-box table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+  .consent-box td { padding: 4px 8px; vertical-align: top; }
+  .consent-box td:first-child { color: var(--white-50); white-space: nowrap; }
+  .consent-box .highlight-red { color: #E87070; font-weight: 600; }
+  .error-msg { font-size: 12px; color: var(--error); margin-top: 0.5rem; display: none; }
+  .nav-buttons { display: flex; gap: 10px; margin-top: 1.25rem; }
+  .btn-prev {
+    flex: 0 0 auto; padding: 0.85rem 1.25rem;
+    background: transparent; border: 1px solid var(--white-20);
+    border-radius: 12px; color: var(--white-50);
+    font-size: 14px; cursor: pointer; transition: border 0.2s;
+  }
+  .btn-prev:hover { border-color: var(--white-50); }
+  .btn-next {
+    flex: 1; padding: 0.85rem;
+    background: var(--blue-accent); border: none;
+    border-radius: 12px; color: var(--white);
+    font-size: 15px; font-weight: 700;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .btn-next:hover { background: var(--blue-bright); }
+
+  /* ── 완료 화면 ── */
+  #screen-done { display: none; text-align: center; padding: 3rem 2rem; }
+  .done-icon {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: rgba(79,127,212,0.15);
+    border: 1.5px solid var(--blue-accent);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.5rem; font-size: 32px;
+  }
+  .done-title { font-size: 22px; font-weight: 700; margin-bottom: 0.75rem; }
+  .done-desc { font-size: 14px; color: var(--white-50); line-height: 1.8; }
+
+  .sending-overlay {
+    position: fixed; inset: 0;
+    background: rgba(17,24,48,0.85);
+    align-items: center; justify-content: center;
+    z-index: 999; display: none;
+  }
+  .sending-text { color: var(--white); font-size: 16px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- 홈 화면 -->
+  <div id="screen-home">
+    <div class="logo-wrap">
+      <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAChAKEDASIAAhEBAxEB/8QAHAABAAEFAQEAAAAAAAAAAAAAAAIBBQYHCAME/8QANxAAAQMDAwIFAgQFAwUAAAAAAQACAwQFEQYHEiExCBNBUpEiURRhcYEVFiMysTNCcjWDktPw/8QAGgEBAQADAQEAAAAAAAAAAAAAAAECAwQFB//EACoRAQEAAQMDBAAFBQAAAAAAAAABAgMRIQQSYRMxQVEFgZGxwRQVMnGh/9oADAMBAAIRAxEAPwDR3N/vd8pzf73fKii+gPPS5v8Ae75Tm/3u+VFEEub/AHu+U5v97vlRRBLm/wB7vlOb/e75UUQS5v8Ae75Tm/3u+VFEEub/AHu+U5v97vlRRBLm/wB7vlOb/e75UUQS5v8Ae75Tm/3u+VFEEub/AHu+U5v97vlRRBLm/wB7vlOb/e75UUQS5v8Ae75RRRAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQFeNI1mnKK7tl1PZ6u7UOMeTT1n4c5yOpPE5GM9Mt/VWdZps/t9V7janfZqW50luEUJnkkny5xaHAEMYMcndfuBjPXsterljjhbndoslt4Z9bdXeHSLj5u2185+vKoMgz+84z8Kx6v3C26bVGLSG1NlFOB/r3UPe9x/4MeAP/I5Xv4h9q7JtlRWKOguVdX1lwMxmfNxawCMM/taBkZL/UnstQjsuPp9DR1ZNTG2zzazytnDZul9wtFtrY26n2p05UUZOHvtzJIpWD7gOe4O/TLf1WV1+sPDjLkM23vn5Fknl/4nWiQtkeH7QNo3F1XX2O7VtbR+VQOqoZKYtzybIxpBDgcj68+nZXX6fSwxuplbJPq0mVt2Y1r2v0dcbgyTR+na6ywDPNtRX+eH/bDS3LfX/c5Y2tk747U1O2VdRB96prlS15k8jDfLmZxxnkzJ6fV0IPp2HTOtl06GeGenLhd4wyll5ERFuQREQEREBERAREQEREBERAXpS1FRR1MdVSVEtPPE4OjlieWvYR2II6grzWdbIaq03pDWYump7A270jovLYeLXupnZB8xrHdHHpjuCM9D6HDVyuOFsm/hZ7s62ixr+eem3ejvdys1NSOnt91qnTMhpCMGTlOMDDmgf3kjLMDqet6uOkfDHTyuada17CPSnqHSj9iInf5W5bLvTtVf6R0X8y0dO2RhZJDcI3QDB6EHmA0j9CQtSax2e2iv1xfX6U3Js1lbK4ufTGqinhBPs/qNLR+WSB6YXgY69y1L392nPqe37Ojt4+3wUelfDJLKGjW90dk9pZHsHz5I/wAry3MobJoWz2+4bKxXZ81dHJ+NvdA+WpjEAIBhMnVrXF7Q44w4cB6Hr9OnNkdsLdXNqNT7p2i407Opp4KqKnDv+TvMccfpg/mtzT7qbSaSs8NDS6ltUdLTMDIae3gzhoHYARgqZ61xynp3LPxfb9kmPHMkcK3S43C618lfdK6prquT++aolMj3Y6DLiSV8y2r4itd6R1zfaao0vYDRug5fiK+SMRSVROOhaO4GOhcc9T2x11Uve0crlpy3Ht8NGU2oiItqCIiAiIgIiICIiAiKjuyCuD9imD9iu7LbS6ypNA6Th0BS6SZTi1QmpbdBM3DjGwjgIvvlxOfUhYNuW3cT+YtAHWUOkmUR1TSCI2kTmQyZPR3mdOOM9uucLycPxPvy27Z8/PPHjZtulxu5LyFIdAM9M9l1x4ktAWzXdNcbvpUMk1Pp0Nir6SNuHTxOYJGjGMlwa7LSO/1N6kDF6uFFSVHiA0G2opYpBHpyaRgcwHi8YAd+oyVZ+KY3CZTHnnef6m//AE9K77OKzgnuFUA+i6i0vvxqW67tUmkprHYmUU13dROkZDJ5gYJC3IJfjOB9sfkss2yopqXcvd+n0/SUEVWyeldSRzsIgEzopCOYb14lxycdepV1Ovz05bnhtxv7+diYS+1cZFpAyRhB2XetFJrWlpLpU7jUWj5NPw2+V8zLXBUTSuxjILHghzePPIAz2/NY1s0zVJ8PumHaLgsJrjLUeaLuJPLEXnzdvL68s8fyxlav7re23t+ZPfjnfx4X0eXF3YdUPddf+IKW+QbB3Zuu6Oxm6y1kTKF9ohlfEz6mnJc8ZY7AkGegwQO5Wt/F41janRQY0DNlBJHr1aujp+u9Wybe9vz9MctPtaIHU4HVV4u9p+FtDwyDVB3FlOkmWR1wFBJyF28zyfL5Mzjy+vLOMenddNE7446022fzVp1PXXRz7Np+u38GOn3Tdwoi+i5+Z/EqrzuHmec/nw/tzyOcZ9F869CXeNYiIqCIiAiIgKh6hVRBvCy13h5bZaJlzj1Oa8QM/E+XJLx8ziOWMO7ZyrhrHdLb8R6CsOl4bm20afvUNwmmqWkuYxryS0Akucfrcf2A656c/Edcqq4f6DC3fLK382z1L9NxXfd5ts8QFfrzTDp57VV+THUU8jeBqIhExrmkHs4FpIPoQPQkHNNRb4aOm3q05q2jjr5rbSW6ajqsw8ZIzI7IcGk/UB6//A80rN9t4tMz2XUkl80/T3Cpt9vNbTSSVk0Je4Swx+VhjwCMPc779PssdXotGSWy8Tb+Empk2va9UeHO26qi1NSUeom3KKqNW15EhaJC4uzx5Yxknoo6e3Z2/Zq3caovZuj7TqcwMhEMBEhjETmPzhwLT9XTBWK1el9ADauS4RxxnUDbNBVmON8zpfNlmcxrv9Tyy36cFoZkZBOMr767amw22LStNVuD6+KuoW6gDqocZoaqTALC1/0iNzXRnGCch32XJ6ehZZncvrnxyz3u3DJNJ7kbHaHrKu86Zo9SyXB9K+Fsc73ua8Eh3H6nkDJa3rjorXpTcHams2gsejtatvL5LfPLUObSBzAHuklI+prgSOMnb7qyyaK0BLo+eugq2xXak01LXTUj6h2JpnOcI5Yzy7tLS1zO31NOO6u8e3+2lRdoKB1Q2kqmXC5OEb6p5jqqaBzmtjDuWWvbljgf9wa/Oeil0+n2v+W+/wCfG6y5PLXm4e2FNs9dtD6EpryXXOpZM41Zc4MIcwl3JzicYjaMD75Vz1Br/ZHXFoskusaO/sr6CiZTcIA4BmAMjLXYcMjusP1RovT9LtGNQUdBSQVbKK3yiYzyvkndKyIyEf1eAIe97S3h0Df0WovRdGh0ulqY74Wza355Y5Z2XZto1OxkGvKeSCjv8mmv4c8TML5BN+K5jiQeYPHhn17rIzd/DSB/0jVJ/wC/L/7VoLCr6Loy6OZbb55fqx779PSpdE6qlMAcIi88A7uG56Z/ZeaIuyTZgIiICIiAiIgIiICIiAqEZVUQUAHXIHU5VAxgPRjR+ykimwpxGMY9coQCCMDB7qqKiIY0HIAypIimwIiKgiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiD//Z" alt="SNOBBLE TRAINING" style="width:110px;height:110px;border-radius:22px;">
+    </div>
+    <div class="snowball-story">
+      <p>작은 눈뭉치는<br>처음에는 보잘것없어 보이지만,<br><br>한번 굴러가기 시작하면<br>시간이 쌓일수록 커집니다.</p>
+      <span class="highlight">지속될 수 있는 환경을 같이 만드는 곳,<br>SNOBBLE TRAINING</span>
+    </div>
+    <div class="survey-meta">
+      <span><span class="meta-dot"></span> 총 14문항</span>
+      <span><span class="meta-dot"></span> 소요 시간 약 2분</span>
+    </div>
+    <button class="btn-start" onclick="startSurvey()">설문 시작하기</button>
+    <p class="privacy-note">입력하신 내용은 상담 목적 외에는 사용되지 않으며,<br>외부로 절대 공유되지 않습니다.</p>
+  </div>
+
+  <!-- 설문 화면 -->
+  <div id="screen-survey">
+    <div class="progress-bar-wrap">
+      <div class="progress-top">
+        <span id="progress-label">1 / 14</span>
+        <span id="progress-pct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="question-card" id="question-card"></div>
+    <p class="error-msg" id="error-msg">필수 항목입니다. 응답해 주세요.</p>
+    <div class="nav-buttons">
+      <button class="btn-prev" id="btn-prev" onclick="prevStep()">‹ 이전</button>
+      <button class="btn-next" id="btn-next" onclick="nextStep()">다음 ›</button>
+    </div>
+  </div>
+
+  <!-- 완료 화면 -->
+  <div id="screen-done">
+    <div class="done-icon">✓</div>
+    <p class="done-title">설문이 완료되었습니다</p>
+    <p class="done-desc">소중한 시간 내어 참여해 주셔서 감사합니다.<br><br>작성해 주신 답변을 바탕으로, 2차 오리엔테이션 상담에서 더 꼼꼼하게 자세하게 도와드리겠습니다. 😊</p>
+  </div>
+</div>
+
+<div class="sending-overlay" id="sending-overlay">
+  <span class="sending-text">제출 중...</span>
+</div>
+
+<script>
+const FORMSPREE_ID = 'mkoayrqa';
+
+const questions = [
+  { id:'name', label:'01 · 기본 정보', title:'성함을 알려주세요', type:'text', placeholder:'이름을 입력해 주세요 (최대 100자)', required:true },
+  { id:'phone', label:'02 · 기본 정보', title:'연락처를 알려주세요', type:'tel', placeholder:'연락처를 입력해주세요. (-없이 번호만 입력)', required:true },
+  { id:'address', label:'03 · 기본 정보', title:'주소를 알려주세요', desc:'(근처/동네만 작성해주세요)', type:'text', placeholder:'주소를 입력해 주세요 (최대 100자)', required:false },
+  { id:'birthday', label:'04 · 기본 정보', title:'생년월일을 알려주세요', desc:'연령에 맞는 운동 강도와 프로그램 구성을 위해 필요합니다.', type:'text', placeholder:'숫자만 입력 (예: 19990101)', required:true },
+  { id:'gender', label:'05 · 기본 정보', title:'성별을 알려주세요', type:'radio', options:['남성','여성'], required:true },
+  { id:'job', label:'06 · 생활 정보', title:'직업을 알려주세요', desc:'앉아있는 업무 시간과 활동량을 파악해, 맞춤 솔루션을 드리기 위해 필요합니다.', type:'text', placeholder:'직업을 입력해 주세요 (최대 100자)', required:false },
+  { id:'channel', label:'07 · 방문 경로', title:'어떤 경로로 저희를 알게 되셨나요?', desc:'어떤 경로로 찾아 오셨는지 참고하겠습니다.', type:'radio', options:['인스타그램','네이버 검색','유튜브','지인소개','기타'], hasEtc:true, required:true },
+  { id:'goal', label:'08 · 운동 목표', title:'운동 목표가 무엇인가요?', desc:'원하시는 방향을 정확히 파악하여 프로그램을 짜우기 위해 필요합니다.', type:'radio', options:['체지방 감소','통증 해결','건강 (체력 및 영양 관리)','근력증진 (파워, 기능성)','기타'], hasEtc:true, required:true },
+  { id:'goal_detail', label:'09 · 운동 목표', title:'그 중 가장 해결하고 싶은 건 무엇인가요?', type:'textarea', placeholder:'자유롭게 작성해 주세요 (최대 2000자)', required:false },
+  { id:'exercise_exp', label:'10 · 운동 경험', title:'이전 운동 경험 만족도는 어땠나요?', type:'textarea', placeholder:'자유롭게 작성해 주세요 (최대 2000자)', required:false },
+  { id:'sleep', label:'11 · 생활 습관', title:'평균 수면 시간은 어느 정도인가요?', desc:'몸의 회복과 컨디션 조절에 필수 요소이기 때문에 참고합니다.', type:'radio', options:['3~5시간','5~7시간','7~9시간','기타'], required:true },
+  { id:'menstrual', label:'12 · 여성 건강', title:'생리 주기 트레이닝 관련 체크', desc:'여성분들의 컨디션은 생리 주기에 따라 운동 반응이 달라질 수 있습니다.\n생리 주기에 따른 트레이닝 강도 조절을 위해 확인하는 항목입니다.\n(1) 생리 주기  (2) 생리 기간  (3) 생리통 (0~10)', type:'textarea', placeholder:'자유롭게 작성해 주세요 — 해당 없으면 비워두셔도 됩니다', required:false, genderOnly:'female' },
+  { id:'birth_history', label:'13 · 건강 정보', title:'출산 유무 및 방법을 알려주세요', desc:'해당되는 분만 선택적으로 작성해주세요.', type:'textarea', placeholder:'자유롭게 작성해 주세요 — 해당 없으면 비워두셔도 됩니다', required:false, genderOnly:'female' },
+  { id:'special_note', label:'14 · 기타', title:'특이사항이 있으면 알려주세요', type:'textarea', placeholder:'자유롭게 작성해 주세요 (최대 2000자)', required:false },
+  { id:'consent', label:'15 · 개인정보 동의', title:'개인정보 수집 및 이용에 동의해 주세요', desc:'소중한 정보를 믿고 맡겨주신 만큼, 저희도 그 신뢰에 책임을 다하겠습니다.', type:'consent', required:true }
+];
+
+let answers = {};
+let currentStep = 0;
+let selectedGender = null;
+
+function getVisibleQuestions() {
+  return questions.filter(q => {
+    if (!q.genderOnly) return true;
+    if (q.genderOnly === 'female') return selectedGender === '여성';
+    return true;
+  });
+}
+
+function startSurvey() {
+  document.getElementById('screen-home').style.display = 'none';
+  document.getElementById('screen-survey').style.display = 'block';
+  currentStep = 0;
+  renderStep();
+}
+
+function renderStep() {
+  const visible = getVisibleQuestions();
+  const total = visible.length;
+  const q = visible[currentStep];
+  const pct = Math.round((currentStep / total) * 100);
+  document.getElementById('progress-label').textContent = (currentStep + 1) + ' / ' + total;
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+  const card = document.getElementById('question-card');
+  const saved = answers[q.id] || '';
+  let bodyHTML = '';
+  if (q.type === 'text' || q.type === 'tel') {
+    bodyHTML = '<input class="q-input" type="' + q.type + '" id="q-input" placeholder="' + (q.placeholder||'') + '" value="' + saved.replace(/"/g,'&quot;') + '" maxlength="' + (q.type==='tel'?20:100) + '">';
+  } else if (q.type === 'textarea') {
+    bodyHTML = '<textarea class="q-textarea" id="q-input" placeholder="' + (q.placeholder||'') + '" maxlength="2000">' + saved + '</textarea>';
+  } else if (q.type === 'radio') {
+    bodyHTML = '<div class="options-list" id="options-list">';
+    q.options.forEach(function(opt, i) {
+      var sel = saved === opt ? 'selected' : '';
+      var isEtc = q.hasEtc && i === q.options.length - 1;
+      bodyHTML += '<div class="option-item ' + sel + '" onclick="selectRadio(this,\'' + opt + '\',' + isEtc + ')"><div class="option-circle"><div class="option-dot"></div></div><span class="option-text">' + opt + '</span></div>';
+    });
+    bodyHTML += '</div>';
+    if (q.hasEtc) {
+      var etcVal = answers[q.id + '_etc'] || '';
+      bodyHTML += '<input class="etc-input" id="etc-input" placeholder="직접 입력해 주세요" value="' + etcVal.replace(/"/g,'&quot;') + '">';
+      if (saved === '기타') setTimeout(function(){ var ei=document.getElementById('etc-input'); if(ei) ei.style.display='block'; }, 10);
+    }
+  } else if (q.type === 'consent') {
+    bodyHTML = '<div class="consent-box"><table><tr><td>수집하는 개인정보 항목</td><td>이름, 연락처, 생년월일, 주소 등</td></tr><tr><td>수집 및 이용 목적</td><td>상담 예약을 위함</td></tr><tr><td>보유 및 이용기간</td><td class="highlight-red">레슨 휴가기간 종료 후 3년</td></tr></table></div><div class="option-item ' + (saved==='agreed'?'selected':'') + '" id="consent-item" onclick="toggleConsent(this)"><div class="option-square"><span class="option-check">✓</span></div><span class="option-text">개인정보 수집 및 이용에 동의합니다.</span></div>';
+  }
+  var descText = q.desc ? q.desc : '';
+  card.innerHTML = '<div class="q-label">' + q.label + '</div><div class="q-title">' + q.title + '</div>' + (descText ? '<div class="q-desc">' + descText + '</div>' : '') + '<div class="q-body">' + bodyHTML + '</div>';
+  document.getElementById('btn-prev').style.visibility = currentStep === 0 ? 'hidden' : 'visible';
+  document.getElementById('btn-next').textContent = currentStep === visible.length - 1 ? '제출하기' : '다음 ›';
+  document.getElementById('error-msg').style.display = 'none';
+}
+
+function selectRadio(el, val, isEtc) {
+  document.querySelectorAll('.option-item').forEach(function(o){ o.classList.remove('selected'); });
+  el.classList.add('selected');
+  var visible = getVisibleQuestions();
+  var q = visible[currentStep];
+  answers[q.id] = val;
+  if (q.id === 'gender') selectedGender = val;
+  var etcInput = document.getElementById('etc-input');
+  if (etcInput) etcInput.style.display = isEtc ? 'block' : 'none';
+}
+
+function toggleConsent(el) {
+  var visible = getVisibleQuestions();
+  var q = visible[currentStep];
+  if (el.classList.contains('selected')) { el.classList.remove('selected'); answers[q.id] = ''; }
+  else { el.classList.add('selected'); answers[q.id] = 'agreed'; }
+}
+
+function getStepAnswer() {
+  var visible = getVisibleQuestions();
+  var q = visible[currentStep];
+  if (q.type === 'text' || q.type === 'tel' || q.type === 'textarea') {
+    var el = document.getElementById('q-input');
+    return el ? el.value.trim() : '';
+  }
+  if (q.type === 'radio') {
+    if (answers[q.id] === '기타' && q.hasEtc) {
+      var etc = document.getElementById('etc-input');
+      answers[q.id + '_etc'] = etc ? etc.value.trim() : '';
+    }
+    return answers[q.id] || '';
+  }
+  if (q.type === 'consent') return answers[q.id] || '';
+  return '';
+}
+
+function nextStep() {
+  var visible = getVisibleQuestions();
+  var q = visible[currentStep];
+  var val = getStepAnswer();
+  if (q.type === 'text' || q.type === 'tel' || q.type === 'textarea') answers[q.id] = val;
+  if (q.required && !val) { document.getElementById('error-msg').style.display = 'block'; return; }
+  document.getElementById('error-msg').style.display = 'none';
+  if (currentStep < visible.length - 1) { currentStep++; renderStep(); window.scrollTo(0,0); }
+  else submitSurvey();
+}
+
+function prevStep() {
+  if (currentStep > 0) { currentStep--; renderStep(); window.scrollTo(0,0); }
+}
+
+async function submitSurvey() {
+  var overlay = document.getElementById('sending-overlay');
+  overlay.style.display = 'flex';
+  var formData = new FormData();
+  formData.append('_subject', '[SNOBBLE] 새 상담 사전 설문 응답');
+  formData.append('_replyto', 'jangusuk1999@gmail.com');
+  var labels = { name:'성함', phone:'연락처', address:'주소', birthday:'생년월일', gender:'성별', job:'직업', channel:'유입 경로', channel_etc:'유입 경로 (기타)', goal:'운동 목표', goal_etc:'운동 목표 (기타)', goal_detail:'가장 해결하고 싶은 것', exercise_exp:'이전 운동 경험', sleep:'평균 수면 시간', menstrual:'생리 주기 정보', birth_history:'출산 정보', special_note:'특이사항', consent:'개인정보 동의' };
+  Object.entries(answers).forEach(function([k,v]){ formData.append(labels[k]||k, v==='agreed'?'동의함':v); });
+  try {
+    var res = await fetch('https://formspree.io/f/' + FORMSPREE_ID, { method:'POST', body:formData, headers:{'Accept':'application/json'} });
+    overlay.style.display = 'none';
+    if (res.ok) {
+      document.getElementById('screen-survey').style.display = 'none';
+      document.getElementById('btn-prev').style.display = 'none';
+      document.getElementById('btn-next').style.display = 'none';
+      document.getElementById('screen-done').style.display = 'block';
+    } else { alert('제출 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.'); }
+  } catch(e) { overlay.style.display = 'none'; alert('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.'); }
+}
+</script>
+</body>
+</html>
