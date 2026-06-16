@@ -200,6 +200,99 @@
     z-index: 999; display: none;
   }
   .sending-text { color: var(--white); font-size: 16px; }
+ .btn-location-link {
+    margin-top: 1rem;
+    width: 100%;
+    padding: 0.75rem;
+    background: transparent;
+    border: 1px solid var(--white-20);
+    border-radius: 12px;
+    color: var(--white-80);
+    font-size: 14px;
+    cursor: pointer;
+    transition: border 0.2s, background 0.2s;
+  }
+  .btn-location-link:hover {
+    border-color: var(--blue-accent);
+    background: var(--white-06);
+  }
+
+  .location-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(17,24,48,0.92);
+    z-index: 998;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+  .location-modal.open { display: flex; }
+
+  .location-card {
+    background: var(--navy);
+    border: 1px solid var(--white-20);
+    border-radius: 20px;
+    padding: 2rem 1.5rem;
+    max-width: 420px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  .location-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: var(--white-50);
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .location-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .location-address {
+    font-size: 14px;
+    color: var(--blue-bright);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  .location-section { margin-bottom: 1.25rem; }
+
+  .location-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 0.4rem;
+  }
+
+  .location-text {
+    font-size: 13px;
+    color: var(--white-80);
+    line-height: 1.8;
+  }
+
+  .btn-navigate {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.85rem;
+    background: #03C75A;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-navigate:hover { background: #02b350; }
 </style>
 </head>
 <body>
@@ -220,6 +313,7 @@
     </div>
     <button class="btn-start" onclick="startSurvey()">설문 시작하기</button>
     <p class="privacy-note">입력하신 내용은 상담 목적 외에는 사용되지 않으며,<br>외부로 절대 공유되지 않습니다.</p>
+    <button class="btn-location-link" onclick="openLocation()">📍 오시는 길 / 주차 안내 보기</button>
   </div>
 
   <!-- 설문 화면 -->
@@ -246,9 +340,42 @@
     <div class="done-icon">✓</div>
     <p class="done-title">설문이 완료되었습니다</p>
     <p class="done-desc">소중한 시간 내어 참여해 주셔서 감사합니다.<br><br>작성해 주신 답변을 바탕으로, 2차 오리엔테이션 상담에서 더 꼼꼼하게 자세하게 도와드리겠습니다. 😊</p>
+    <button class="btn-location-link" onclick="openLocation()">📍 오시는 길 / 주차 안내 보기</button>
   </div>
-</div>
+<!-- 오시는 길 모달 -->
+  <div id="location-modal" class="location-modal">
+    <div class="location-card">
+      <button class="location-close" onclick="closeLocation()">✕</button>
+      <p class="location-title">오시는 길</p>
+      <p class="location-address">강원도 원주시 황금로 29, 4층<br>(반곡동 1924-14)</p>
 
+      <div class="location-section">
+        <p class="location-section-title">찾아오는 길</p>
+        <p class="location-text">
+          네이버에 <b>"황금로 29"</b> 또는 <b>"반곡동 1924-14"</b> 검색해 주세요.<br>
+          스노블트레이닝PT센터는 4층에 위치해 있습니다.<br>
+          한국관광공사 정문, 한국광해광업공단 후문, 건강보험공단 구관에서 도보 5~10분 거리입니다.
+        </p>
+      </div>
+
+      <div class="location-section">
+        <p class="location-section-title">주차 안내 (전체 무료)</p>
+        <p class="location-text">
+          1. 반곡동 쌈지 주차장 (쿠우쿠우 혁신점 옆 공영 주차장)<br>
+          2. 센터 건물 지상 2층 주차장 (공차 혁신점 대각선 방향, 1시간 무료)<br>
+          3. 신춘천닭갈비 건너편 공영 주차장<br>
+          4. 건물 앞 노상 주차장<br>
+          ※ 모두 도보 1분 이내
+        </p>
+      </div>
+
+      <div class="location-section">
+        <p class="location-text">📞 010-4649-1227</p>
+      </div>
+
+      <button class="btn-navigate" onclick="goNaverMap()">네이버 지도로 길찾기 →</button>
+    </div>
+  </div>
 <div class="sending-overlay" id="sending-overlay">
   <span class="sending-text">제출 중...</span>
 </div>
@@ -400,6 +527,49 @@ async function submitSurvey() {
       document.getElementById('screen-done').style.display = 'block';
     } else { alert('제출 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.'); }
   } catch(e) { overlay.style.display = 'none'; alert('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.'); }
+}
+ function openLocation() {
+  document.getElementById('location-modal').classList.add('open');
+}
+
+function closeLocation() {
+  document.getElementById('location-modal').classList.remove('open');
+}
+
+function goNaverMap() {
+  const address = encodeURIComponent('강원도 원주시 황금로 29');
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  if (isMobile) {
+    // 모바일: 네이버 지도 앱 실행 시도, 실패 시 웹으로 폴백
+    window.location.href = `nmap://search?query=${address}&appname=com.snobble.survey`;
+    setTimeout(function() {
+      window.location.href = `https://map.naver.com/p/search/${address}`;
+    }, 800);
+  } else {
+    window.open(`https://map.naver.com/p/search/${address}`, '_blank');
+  }
+}function openLocation() {
+  document.getElementById('location-modal').classList.add('open');
+}
+
+function closeLocation() {
+  document.getElementById('location-modal').classList.remove('open');
+}
+
+function goNaverMap() {
+  const address = encodeURIComponent('강원도 원주시 황금로 29');
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  if (isMobile) {
+    // 모바일: 네이버 지도 앱 실행 시도, 실패 시 웹으로 폴백
+    window.location.href = `nmap://search?query=${address}&appname=com.snobble.survey`;
+    setTimeout(function() {
+      window.location.href = `https://map.naver.com/p/search/${address}`;
+    }, 800);
+  } else {
+    window.open(`https://map.naver.com/p/search/${address}`, '_blank');
+  }
 }
 </script>
 </body>
